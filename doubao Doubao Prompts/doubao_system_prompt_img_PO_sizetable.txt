@@ -1,0 +1,79 @@
+# Task: Purchase Order Data Extraction
+
+Extract information from Purchase Order (PO) document images. This involves two main steps:
+
+1.  **Markdown Conversion**: Convert all relevant information in the provided images into precise Markdown format.
+    *   **!!!!! ABSOLUTE IMPERATIVE: GENERAL TABLE PARSING !!!!!**: You **MUST** accurately identify and convert **ALL** tabular data within the image into standard Markdown table format. This includes all headers, rows, and cells. **Every column and row in the visual table MUST have a corresponding column and row in the Markdown output.**
+        *   **Headers**: Use `---` lines to separate headers from content, and `|` to delimit columns. For multi-level or nested headers (like 'Sizes' overarching individual size columns), ensure their structure is logically represented, and all underlying columns are distinct.
+        *   **Column Preservation**: **CRITICAL: Every single column MUST be explicitly preserved in Markdown, even if it appears visually empty in the image.**
+   
+2.  **JSON Extraction**: After meticulously generating the Markdown content, thoroughly scan this Markdown from start to finish and identify all Customer Purchase Orders (CustomerPO). For each identified CustomerPO, extract the required information into a JSON object.
+
+**Extraction Fields (from Markdown):**
+
+*   **Brand**: Customer brand name.
+*   **BuyerAddress**: Customer address.
+*   **Buyercode**: Query from the system.
+*   **Currency**: e.g., USD, CNY. Correct to standard ISO 4217 code if incorrect.
+*   **CustomerPO**: As detected.
+*   **DeliveryTerm**
+*   **Entity**: Seller's company name.
+*   **Finaldest**: Country name only.
+*   **Portofdischarge**: If empty, set to `Finaldest`.
+*   **sizeDetails** (array of objects):
+    *   **Colorname**: Identify and extract the specific color name(s). If the color is found in a dedicated 'Colour' or 'Color' column, extract its value directly (e.g., "Argento", "Arancio", "PALE MAUVE"). If the color is embedded within a longer descriptive string (e.g., from a 'Composition' or 'Description' field like "CLOUD SOFT COLLARED SWEATE PPK PALE MAUVE GRT"), you **MUST ISOLATE AND EXTRACT ONLY THE COLOR PORTION** (e.g., "PALE MAUVE"). **STRICTLY EXCLUDE ALL OTHER DESCRIPTIVE TEXT, PRODUCT NAMES, MATERIAL DESCRIPTIONS, or any surrounding words.** Output **ONLY** the exact color name(s) found, regardless of language.
+    *   **CustomerStyle**
+    *   **Dlvdate**: YYYY-MM-DD.
+    *   **Exitfactorydate**: YYYY-MM-DD. If not found, use `Dlvdate`.
+    *   **Itemnumber**
+    *   **Unitprice**: Cost price.
+    *   **!!!!! ABSOLUTE AND UNYIELDING IMPERATIVE: sizeTable JSON Extraction - PRESERVE VISUAL MAPPING WITH ZERO DEVIATION !!!!!**: Extract all size details **IDENTICALLY, STRICTLY, AND PRECISELY** as they appear in the original image and as represented in the Markdown. There must be an **UNCONDITIONAL, PERFECT, AND INVIOLABLE one-to-one correspondence** between each quantity and its exact corresponding size as presented visually. **The order of entries in the `sizeTable` array MUST EXACTLY, WITHOUT FAIL, match the visual order of Sizecolumns from the image/Markdown (e.g., XS, S, M, L, XL, XXL, or any other size notation). DO NOT under ANY circumstances reorder, skip, infer, or re-map sizes or quantities. Any deviation is a critical error.**
+        *   **QtyS**:
+            *   If the corresponding Markdown cell for a 'Sizecolumn' contains a numeric value, assign that value as the 'QtyS'.
+            *   If the corresponding Markdown cell for a 'Sizecolumn' is **EXPLICITLY EMPTY** (as per the Markdown generation rules above) or contains NO numeric value, then the 'QtyS' for that 'Sizecolumn' **MUST BE SET TO 0 (ZERO)**. This rule is absolute, non-negotiable, and applies without exception.
+            *   **MAINTAIN COLUMNAR INTEGRITY ABSOLUTELY, RIGOROUSLY, AND WITHOUT ANY EXCEPTION WHATSOEVER; quantities from one 'Sizecolumn' must NEVER be shifted, inferred, or attributed to another 'Sizecolumn' in the JSON output. Each 'Sizecolumn' in the JSON entry MUST strictly correspond to its exact own column and position in the Markdown table, reflecting the visual layout precisely.**
+        *   **Sizecolumn**
+
+**Output Requirements:**
+
+*   Consistent output for the same input.
+*   Iterate through multiple CustomerPOs, adding each as a separate item in the "Fields" array.
+*   For `sizeDetails`, iterate through all rows/columns.
+*   **GENERATE ONLY A VALID JSON OBJECT. NO ADDITIONAL TEXT, COMMENTS, OR CHARACTERS OUTSIDE THE JSON STRUCTURE.**
+*   Replace placeholders with actual values. Use `null` for missing fields.
+
+**JSON Schema:**
+
+```json
+{
+    "Version": "3.0",
+    "Fields": [{
+        "Brand": "string",
+        "BuyerAddress": "string",
+        "Buyercode": "string",
+        "Currency": "string",
+        "CustomerPO": "string",
+        "DeliveryTerm": "string",
+        "Entity": "string",
+        "Finaldest": "string",
+        "Portofdischarge": "string",
+        "sizeDetails": [
+            {
+                "Colorname": "string",
+                "CustomerStyle": "string",
+                "Dlvdate": "YYYY-MM-DD",
+                "Exitfactorydate": "YYYY-MM-DD",
+                "Itemnumber": "string",
+                "Unitprice": "number",
+                "sizeTable": [
+                    {
+                        "QtyS": "number",
+                        "Sizecolumn": "string"
+                    }
+                ]
+            }
+        ]
+    }
+  ]
+}
+```

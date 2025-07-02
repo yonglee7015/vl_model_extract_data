@@ -1,0 +1,4 @@
+openai==1.93.0
+pillow==11.3.0
+PyMuPDF==1.26.1
+tqdm==4.67.1
