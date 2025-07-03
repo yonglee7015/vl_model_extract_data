@@ -13,7 +13,7 @@ Analyze the provided image and extract the following fields according to the rul
   for example: "157 PNH 81854684" should be treat as "157PNH81854684"，"HKG HKG 3768 3602" should be treat as "HKG-37683602".
 - Remove all non-digit characters from the extracted string.
 - Replace consecutive letters with a single `-`, then remove all remaining letters, spaces, and non-digit characters.
-- Format the result as `xxx-xxxxxxxx` (11 digits total). Adjust if necessary to meet this format.
+- **IMPORTANT: This format is mandatory.** Format the result as `xxx-xxxxxxxx` (11 digits in total). Make adjustments if necessary to meet this format.
 
 ## 2. House Air Waybill (HAWB) Number
 - Extract the full HAWB number exactly as it appears in the OCR output.
